@@ -21,14 +21,15 @@ int lecturaS2=0;
 //altura de tanques
 
 const int H_Q = 193; 
+float H_QR = 193.00;
 const int CAPACIDAD = 1178;
 
 int nivelQ0;
 int nivelQ1;
 int nivelQ2;
-int xQ0;
-int xQ1;
-int xQ2;
+float xQ0;
+float xQ1;
+float xQ2;
 int a0;
 int a1;
 int a2;
@@ -60,6 +61,7 @@ int readSensors(){
   sumatoria=0;
   for(int i =0; i< samplesQuantity; i++){
     samples[i] = analogRead(A0);
+    delay(200);
   }
 
   for(int i=0; i < samplesQuantity ;i++){
@@ -115,19 +117,22 @@ int calculoNivel(int valor){
   return nivel;
 }
 
-int obtener_distancia_h(int valor){
-  long distancia;
-  int h;
+float obtener_distancia_h(int valor){
+  //long distancia;
+  //int h;
 
-  distancia = 500 * (long) valor;
+  float distancia;
+  float h;
+  
+  distancia = 500 * (float) valor;
   distancia = distancia /1023;
 
-  if(distancia >= H_Q ){
+  if(distancia >= H_QR ){
     h = 0;
   }else if(distancia <=0 ){
-    h = H_Q;
+    h = H_QR;
   }else{
-    h = H_Q - distancia;    
+    h = H_QR - distancia;    
   }  
   
   return h;
@@ -145,11 +150,13 @@ void loop(){
     Serial.flush();
   }
   Serial.println("INPUTSERIAL: " + String(input_serial));
+  
   /*
   lecturaS0 = input_serial;
   lecturaS1 = input_serial;
   lecturaS2 = input_serial;
   */
+  
   nivelQ0 =  calculoNivel(lecturaS0);
   nivelQ1 =  calculoNivel(lecturaS1);
   nivelQ2 =  calculoNivel(lecturaS2);
@@ -158,6 +165,8 @@ void loop(){
   xQ1 = obtener_distancia_h(lecturaS1);
   xQ2 = obtener_distancia_h(lecturaS2);
 
+  Serial.println("Esta es la distancia x: " + String(xQ0));
+  
   if(nivelQ0 <= 20){
     digitalWrite(luz0,LOW);
     a0 = 1;
@@ -188,9 +197,9 @@ void loop(){
   frame.replace("N1",String(nivelQ1,DEC));
   frame.replace("N2",String(nivelQ2,DEC));
 
-  frame.replace("x0",String(xQ0,DEC));
-  frame.replace("x1",String(xQ1,DEC));
-  frame.replace("x2",String(xQ2,DEC));
+  frame.replace("x0",String(xQ0,2));
+  frame.replace("x1",String(xQ1,2));
+  frame.replace("x2",String(xQ2,2));
 
   frame.replace("A0",String(a0,DEC));
   frame.replace("A1",String(a1,DEC));
@@ -208,7 +217,7 @@ void loop(){
   
   Bt.println(frame);
   Serial.println(frame);
-  delay(1000);
+  //delay(1000);
   
 
 }
